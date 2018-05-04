@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#db4437</color>
+    <color name="primary_dark">#0d1029</color>
+    <color name="primary_dark2">#832921</color>
+    <color name="primary_light">#CFD8DC</color>
+    <color name="accent">#f04d3f</color>
+    <color name="primary_text">#000000</color>
+    <color name="secondary_text">#757575</color>
+    <color name="icons">#f2f2f2</color>w
+    <color name="white">#ffffff</color>
+    <color name="divider">#BDBDBD</color>
+    <color name="sava_1">#fecd4e</color>
+    <color name="sava_2">#a4cf5c</color>
+    <color name="pink">#f04d3f</color>
+    <color name="sava_3">#23bea5</color>
+    <color name="sava_4">#dc3545</color>
+</resources>
