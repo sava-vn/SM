@@ -81,12 +81,10 @@ public class ReminderAdd extends AppCompatActivity implements TimePickerDialog.O
                 Toast.makeText(this, "Hãy bấm vào icon để chọn ngày", Toast.LENGTH_SHORT).show();
                 return false;
             }
-            Reminder reminder = new Reminder();
-            reminder.setmTitle(edtReminderTitle.getText().toString());
-            reminder.setmContent(edtReminderContent.getText().toString());
             Intent intent = new Intent();
-            intent.putExtra("date",dateSelect.getTime());
-            intent.putExtra(RESULT_NEW_REMINDER,reminder);
+            intent.putExtra("TITLE",edtReminderTitle.getText().toString());
+            intent.putExtra("CONTENT",edtReminderContent.getText().toString());
+            intent.putExtra("DATE",dateSelect.getTime());
             setResult(RESULT_REMINDERFRAGMENT,intent);
         }
         finish();

@@ -83,22 +83,7 @@ public class ReminderFragment extends Fragment implements TimePickerDialog.OnTim
         database = new Database(getActivity());
         mList = database.getAllReminder();
 
-        //Khởi tạo danh sách pendingIntent;
-        for (Reminder reminder:mList) {
-            PendingIntent pendingIntent =null;
-            int pendingID = reminder.getmStatus();
-            if(pendingID!=0){
-                Intent intent = new Intent(getActivity(),AlarmReceiver.class);
-                pendingIntent = PendingIntent.getBroadcast(getActivity(),pendingID,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-                alarmManager.set(AlarmManager.RTC_WAKEUP,reminder.getmDate().getTime(),pendingIntent);
-                if(reminder.getmDate().getTime()<System.currentTimeMillis()){
-                    pendingIntent.cancel();
-                    reminder.setmStatus(0);
-                    database.updateReminderStatus(reminder);
-                }
-                pendingIntentArrayList.add(pendingIntent);
-            }
-        }
+        loadAllPadingInentAndSetAlarm();
         mRecyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -123,7 +108,20 @@ public class ReminderFragment extends Fragment implements TimePickerDialog.OnTim
 
             @Override
             public void onClick2(View view, int position, RecyclerView.ViewHolder viewHolder) {
-                mReminderAdpater.setBG((ReminderAdpater.ViewHolder) viewHolder, position);
+                Reminder reminder = mList.get(position);
+                if(reminder.getmStatus()>0){
+                    reminder.setmStatus(0);
+                    pendingIntentArrayList.get(position).cancel();
+                }else{
+                    if(reminder.getmDate().getTime()<System.currentTimeMillis()){
+                        Toast.makeText(getActivity(), "Thời gian không đúng !", Toast.LENGTH_SHORT).show();
+                        return;
+                    }else{
+                        reminder.setmStatus((int)System.currentTimeMillis());
+                        pendingIntentArrayList.set(position,createAlarm(reminder));
+                    }
+                }
+                mReminderAdpater.changeViewItem((ReminderAdpater.ViewHolder) viewHolder, position);
                 if (fab.isOpened())
                     fab.close(true);
             }
@@ -174,29 +172,65 @@ public class ReminderFragment extends Fragment implements TimePickerDialog.OnTim
         calendarSelect.set(Calendar.MINUTE, minute);
         calendarSelect.set(Calendar.SECOND, 0);
         dateSelect = calendarSelect.getTime();
-        mList.get(iReminderSelect).setmDate(dateSelect);
+        if(dateSelect.getTime()<System.currentTimeMillis()){
+            Toast.makeText(getActivity(), "Thời gian không đúng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Reminder reminder = mList.get(iReminderSelect);
+        if(reminder.getmStatus()>0){
+            pendingIntentArrayList.get(iReminderSelect).cancel();
+        }
+        reminder.setmDate(dateSelect);
+        reminder.setmStatus((int) System.currentTimeMillis());
+        pendingIntentArrayList.set(iReminderSelect,createAlarm(reminder));
         mReminderAdpater.notifyDataSetChanged();
     }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_REMINDERADD && resultCode == ReminderAdd.RESULT_REMINDERFRAGMENT) {
-            Reminder reminder = data.getExtras().getParcelable(ReminderAdd.RESULT_NEW_REMINDER);
-            Long tiem = data.getExtras().getLong("date");
-            Date date = new Date(tiem);
+            //Tạo reminder mới, lấy dữ liệu từ data, thêm vào list, database
+            Reminder reminder = new Reminder();
+            reminder.setmTitle(data.getExtras().getString("TITLE"));
+            reminder.setmContent(data.getExtras().getString("CONTENT"));
+            reminder.setmDate(new Date(data.getExtras().getLong("DATE")));
             int pendingID = (int) System.currentTimeMillis();
-            reminder.setmDate(date);
             reminder.setmStatus(pendingID);
             mList.add(reminder);
             mReminderAdpater.notifyDataSetChanged();
             database.insertReminder(reminder);
 
-            //Tạo pending intent mới, với id là
-            Intent intent = new Intent(getActivity(),AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),reminder.getmStatus(),intent,PendingIntent.FLAG_UPDATE_CURRENT);
-            alarmManager.set(AlarmManager.RTC_WAKEUP,reminder.getmDate().getTime(),pendingIntent);
+            //Tạo báo thức
+            pendingIntentArrayList.add(createAlarm(reminder));
+        }
+    }
+    public void loadAllPadingInentAndSetAlarm(){
+        for (Reminder reminder: mList) {
+            PendingIntent pendingIntent = null;
+            if(reminder.getmStatus()>0){
+                Intent intent = new Intent(getActivity(),AlarmReceiver.class);
+                intent.putExtra("TITLE",reminder.getmTitle());
+                intent.putExtra("CONTENT",reminder.getmContent());
+                pendingIntent = PendingIntent.getBroadcast(getActivity(),reminder.getmStatus(),intent,PendingIntent.FLAG_UPDATE_CURRENT);
+                if(reminder.getmDate().getTime()<System.currentTimeMillis()){
+                    pendingIntent.cancel();
+                    reminder.setmStatus(0);
+                }
+            }
+            if(reminder.getmStatus()>0){
+                Log.e("ALARM","ON");
+            }else{
+                Log.e("ALARM","OFF");
+            }
             pendingIntentArrayList.add(pendingIntent);
         }
+    }
+    public PendingIntent createAlarm(Reminder reminder){
+        Intent intent = new Intent(getActivity(),AlarmReceiver.class);
+        intent.putExtra("TITLE",reminder.getmTitle());
+        intent.putExtra("CONTENT",reminder.getmContent());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),reminder.getmStatus(),intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP,reminder.getmDate().getTime(),pendingIntent);
+        return  pendingIntent;
     }
 }

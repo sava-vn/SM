@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,13 +43,14 @@ public class ReminderAdpater extends  RecyclerView.Adapter<ReminderAdpater.ViewH
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        final Reminder reminder = mList.get(position);
+        Reminder reminder = mList.get(position);
         holder.ivReminderAvata.setImageResource(R.drawable.bell_ring);
         holder.tvReminderTitle.setText(reminder.getmTitle());
         String date = (String) android.text.format.DateFormat.format("dd-MM-yyyy",reminder.getmDate());
         holder.tvReminderDate.setText(date);
         String time = (String) android.text.format.DateFormat.format("HH : mm",reminder.getmDate());
         holder.tvReminderTime.setText(time);
+        changeViewItem(holder,position);
     }
 
     @Override
@@ -101,17 +103,16 @@ public class ReminderAdpater extends  RecyclerView.Adapter<ReminderAdpater.ViewH
         }
 
     }
-    public  void setBG(ViewHolder holder,int position){
+    public  void changeViewItem(ViewHolder holder,int position){
         Reminder reminder = mList.get(position);
-        if(reminder.getmStatus()>0){
+        Log.e("STATUS : ",""+ reminder.getmStatus());
+        if(reminder.getmStatus()==0){
             holder.ivReminderAvata.setBackground(mContext.getResources().getDrawable(R.drawable.y_custom_iv_2));
-            reminder.setmStatus(0);
             holder.tvReminderTitle.setTextColor(Color.GRAY);
             holder.tvReminderDate.setTextColor(Color.GRAY);
             holder.tvReminderTime.setBackground(mContext.getResources().getDrawable(R.drawable.y_custom_textview2));
         }else {
             holder.ivReminderAvata.setBackground(mContext.getResources().getDrawable(R.drawable.y_custom_iv));
-            reminder.setmStatus(1);
             holder.tvReminderTitle.setTextColor(mContext.getResources().getColor(R.color.white));
             holder.tvReminderDate.setTextColor(mContext.getResources().getColor(R.color.divider));
             holder.tvReminderTime.setBackground(mContext.getResources().getDrawable(R.drawable.y_custom_textview));
