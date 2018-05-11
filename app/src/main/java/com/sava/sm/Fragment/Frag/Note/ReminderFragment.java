@@ -229,6 +229,7 @@ public class ReminderFragment extends Fragment implements TimePickerDialog.OnTim
         Intent intent = new Intent(getActivity(),AlarmReceiver.class);
         intent.putExtra("TITLE",reminder.getmTitle());
         intent.putExtra("CONTENT",reminder.getmContent());
+        intent.putExtra("PENDINGID",reminder.getmStatus());
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(),reminder.getmStatus(),intent,PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.setExact(AlarmManager.RTC_WAKEUP,reminder.getmDate().getTime(),pendingIntent);
         return  pendingIntent;
