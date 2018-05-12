@@ -1,6 +1,7 @@
 package com.sava.sm;
 
 
+import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ public class GhiChuActivity extends AppCompatActivity {
     private Toolbar mtoolbar;
     private SlidingTabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
+    private int currentItem = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +40,17 @@ public class GhiChuActivity extends AppCompatActivity {
         mtoolbar.setTitle("Ghi chú");
         setSupportActionBar(mtoolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        try{
+            currentItem = getIntent().getExtras().getInt("CURRENT");
+        }catch (Exception e){
+
+        }
     }
 
     private void initTabs() {
         mViewPager = findViewById(R.id.vp_tabs);
         mViewPager.setAdapter(new TabGhiChuAdapter(getSupportFragmentManager(), this));
+        mViewPager.setCurrentItem(currentItem);
         mSlidingTabLayout = findViewById(R.id.stl_tabs);
         mSlidingTabLayout.setDistributeEvenly(true);
         mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.primary));
